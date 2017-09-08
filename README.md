@@ -8,7 +8,7 @@
 
 ## Model:
 
-+ I used model from tensorflow tutorial.
++ I implemented by python (with tensorflow framework) and used model from tensorflow tutorial.
 
 + Architecture:
 

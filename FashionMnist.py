@@ -96,6 +96,8 @@ class Solver:
                 res = accuracy
             print 'Iteration %d:' % i, loss, 'Accuracy: ', accuracy
 
+        return res
+
 
 if __name__ == '__main__':
     net = FashionMNIST()

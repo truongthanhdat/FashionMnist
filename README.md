@@ -45,7 +45,7 @@ dropout 0.50
 python FashionMnist.py
 ```
 
-+ The accuracy I achieved on test set is 
++ The accuracy I achieved on test set is 92.39% 
 
 ## Author
 

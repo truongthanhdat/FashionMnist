@@ -47,6 +47,8 @@ class FashionMNIST:
         self.fc2 = tf.matmul(self.drop, self.weig4) + self.bias4
 
         #Loss function
+        vars = tf.trainable_variables()
+        self.l2_loss = tf.add_n([tf.nn.l2_loss(v) for v in vars])
         self.loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels=self.output, logits=self.fc2))
 
         #Accuracy
@@ -75,12 +77,13 @@ class Reader:
 
 
 class Solver:
-    def __init__(self, _net, _reader, _learningRate, _epochs, _batchSize):
+    def __init__(self, _net, _reader, _learningRate, _epochs, _batchSize, _beta):
         self.net = _net
         self.epochs = _epochs
         self.batchSize = _batchSize
         self.reader = _reader
-        self.trainer = tf.train.AdamOptimizer(_learningRate).minimize(self.net.loss)
+        self.beta = _beta
+        self.trainer = tf.train.AdamOptimizer(_learningRate).minimize(self.net.loss + self.net.l2_loss * self.beta)
 
     def train(self, sess):
         res = 0.0
@@ -88,7 +91,7 @@ class Solver:
         for i in xrange(self.epochs):
             images, labels = reader.getBatchTrain(self.batchSize)
             sess.run(self.trainer, feed_dict = {self.net.input: images, self.net.output: labels, self.net.keep_prob: 0.5})
-            loss = sess.run(self.net.loss, feed_dict = {self.net.input: images, self.net.output: labels, self.net.keep_prob: 0.5})
+            loss = sess.run(self.net.loss + self.net.l2_loss * self.beta, feed_dict = {self.net.input: images, self.net.output: labels, self.net.keep_prob: 0.5})
 
             images, labels = reader.getBatchTest(10000)
             accuracy = sess.run(self.net.accuracy, feed_dict = {self.net.input: images, self.net.output: labels, self.net.keep_prob: 1.0})
@@ -96,13 +99,11 @@ class Solver:
                 res = accuracy
             print 'Iteration %d:' % i, loss, 'Accuracy: ', accuracy
 
-        return res
-
 
 if __name__ == '__main__':
     net = FashionMNIST()
     reader = Reader()
-    solver = Solver(net, reader, 1e-4, 50000, 128)
+    solver = Solver(net, reader, 1e-4, 50000, 128, 0.0005)
     sess = tf.InteractiveSession()
     accuracy = solver.train(sess)
 
